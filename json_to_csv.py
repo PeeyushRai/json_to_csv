@@ -2,6 +2,7 @@ import sys
 import json
 import csv
 
+
 ##
 # Convert to string keeping encoding in mind...
 ##
@@ -37,25 +38,66 @@ def to_string(s):
 #   "node_item_5_sub_item_2_0":"sub_item_value_13"
 # }
 ##
-def reduce_item(key, value):
+def reduce_item(json_obj):
     global reduced_item
-    
-    #Reduction Condition 1
-    if type(value) is list:
-        i=0
-        for sub_item in value:
-            reduce_item(key+'_'+to_string(i), sub_item)
-            i=i+1
+    print("JSON Passed:")
+    print(json_obj)
+    for item in json_obj:
+        print("Item: ")
+        print(item)
 
-    #Reduction Condition 2
-    elif type(value) is dict:
-        sub_keys = value.keys()
-        for sub_key in sub_keys:
-            reduce_item(key+'_'+to_string(sub_key), value[sub_key])
-    
-    #Base Condition
-    else:
-        reduced_item[to_string(key)] = to_string(value)
+        if type(json_obj) is list:
+            # print("LIST Key|")
+            # print( item.keys())
+            # print("LIST Values|")
+            # print(item.values())
+            if type (item) is list:
+                print("Is JSON")
+                is_json = True
+            elif type (item) is dict:
+                print("Is JSON")
+                is_json = True
+            else:
+                print("Not JSON")
+                is_json = False
+            #print("LIST Value size:", len(item.keys()))
+            if (is_json):
+                reduce_item(item)
+        else:
+            print("DICT Key|")
+            print(item)
+            print("DICT Value|")
+            print(json_obj[item])
+            if type (json_obj[item]) is list:
+                print("Is JSON")
+                is_json = True
+            elif type (json_obj[item]) is dict:
+                print("Is JSON")
+                is_json = True
+            else:
+                print("Not JSON")
+                is_json = False
+            print("DICT Value size:", len(json_obj))
+            if is_json:
+                reduce_item(json_obj[item])
+    #Reduction Condition 1
+
+    # if type(value) is list:
+    #     i=0
+    #     for sub_item in value:
+    #         reduce_item(key+'_'+to_string(i), sub_item)
+    #         i=i+1
+    #
+    # #Reduction Condition 2
+    # elif type(value) is dict:
+    #     sub_keys = value.keys()
+    #     for sub_key in sub_keys:
+    #         reduce_item(key+'_'+to_string(sub_key), value[sub_key])
+    #
+    # #Base Condition
+    # else:
+    #     reduced_item[to_string(key)] = to_string(value)
+
 
 
 if __name__ == "__main__":
@@ -70,17 +112,26 @@ if __name__ == "__main__":
         fp = open(json_file_path, 'r')
         json_value = fp.read()
         raw_data = json.loads(json_value)
+        print("JSON List/Array Size:",  len(raw_data))
 
         try:
             data_to_be_processed = raw_data[node]
         except:
             data_to_be_processed = raw_data
 
+        global level
+        level = 0
         processed_data = []
         header = []
+
+
+
+        reduce_item(raw_data)
+
         for item in data_to_be_processed:
             reduced_item = {}
-            reduce_item(node, item)
+            #print(node, "|", item)
+            #reduce_item(node, item)
 
             header += reduced_item.keys()
 
